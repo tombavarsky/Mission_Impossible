@@ -15,7 +15,6 @@ bool last_light_sen_val[20];
 int TOF_val;
 bool stop_button_val = false;
 bool last_stop_button_val = false;
-bool someone_entered = false;
 bool has_finnished = false;
 
 void setup()
@@ -36,14 +35,18 @@ void setup()
 
 void loop()
 {
+  bool someone_entered = false;
   bool door_sen_val = digitalRead(LOCK_SEN_PIN);
-  bool has_started = door_sen_val && !last_door_sen_val;
-  long start_time = millis();
+  bool has_started = door_sen_val && !last_door_sen_val; // just closed the door
+  long long start_time = millis();
   int touch_counter = 0;
 
   while (has_started)
   {
+    digitalWrite(LOCK_CONTROL_PIN, 1); // locks door
+
     has_finnished = stop_button_val && !last_stop_button_val;
+
     if (has_finnished)
     {
       break;
@@ -61,6 +64,7 @@ void loop()
       if (!light_sen_val[i] && last_light_sen_val[i])
       {
         touch_counter++;
+        // bad sound from microphone
       }
       last_light_sen_val[i] = light_sen_val[i];
     }
@@ -68,7 +72,11 @@ void loop()
     last_stop_button_val = stop_button_val;
   }
 
+  digitalWrite(LOCK_CONTROL_PIN, 0); // unlocks door
+
+  // LED for next participant could be added here
+
   last_door_sen_val = door_sen_val;
 
-  long total_time = millis() - start_time;
+  long long total_time = millis() - start_time;
 }
