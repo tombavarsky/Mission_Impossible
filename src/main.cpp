@@ -9,7 +9,6 @@ const int START_LED_PIN = 0;              // TBD
 const int MOVMENT_SEN_PIN = 0;            // tbd
 const int FALSE_ENTER_RESET_TIME = 10000; // 10 sec
 
-bool door_sen_val = true;
 bool last_door_sen_val = true;
 bool light_sen_val[20];
 bool last_light_sen_val[20];
@@ -37,6 +36,7 @@ void setup()
 
 void loop()
 {
+  bool door_sen_val = digitalRead(LOCK_SEN_PIN);
   bool has_started = door_sen_val && !last_door_sen_val;
   long start_time = millis();
   int touch_counter = 0;
@@ -48,6 +48,7 @@ void loop()
     {
       break;
     }
+
     if (millis() - start_time >= FALSE_ENTER_RESET_TIME && !someone_entered)
     { // TODO: set someone_entered using the sensor
       has_started = false;
