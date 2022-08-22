@@ -6,7 +6,7 @@
 
 const int RANGE_BOOT_RETRIES = 3;
 const int LIGHT_SEN_AMOUNT = 18;
-const int LOCK_CONTROL_PIN = 0;    // TBD
+const int LOCK_CONTROL_PIN = 25;   // TBD
 const int LOCK_SEN_PIN = 27;       // TBD
 const int STOP_BUTTON_PIN = 0;     // TBD
 const int START_LED_PIN = 0;       // TBD
@@ -130,8 +130,8 @@ void loop()
     if (lox.isRangeComplete())
     {
       TOF_val = lox.readRange();
-      Serial.print("Distance in mm: ");
-      Serial.println(TOF_val);
+      // Serial.print("Distance in mm: ");
+      // Serial.println(TOF_val);
     }
     bool operator_button_val = digitalRead(OPERATOR_BUTTON_PIN);
 
@@ -162,6 +162,9 @@ void loop()
     for (int i = 0; i < LIGHT_SEN_AMOUNT; i++)
     {
       light_sen_val[i] = digitalRead(i);
+      Serial.print(i);
+      Serial.print(" : ");
+      Serial.println(light_sen_val[i]);
 
       if (!light_sen_val[i] && last_light_sen_val[i])
       {
