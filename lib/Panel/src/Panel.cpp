@@ -717,7 +717,7 @@ void Panel::drawBigChar(uint8_t x, uint8_t y, char ch, uint16_t c, uint8_t size_
     for (uint8_t i = 0; i < 5 * size_modifier; i++)
     {
         out = getFontLine(ch, i / size_modifier);
-        Serial.println(out);
+        // Serial.println(out);
         // iterate through the character bit by bit
         for (uint8_t j = 4 * size_modifier; j > 0; --j)
         {

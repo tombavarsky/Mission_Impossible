@@ -7,14 +7,14 @@
 const int RANGE_BOOT_RETRIES = 3;
 const int LIGHT_SEN_AMOUNT = 18;
 const int LOCK_CONTROL_PIN = 0;    // TBD
-const int LOCK_SEN_PIN = 0;        // TBD
+const int LOCK_SEN_PIN = 27;       // TBD
 const int STOP_BUTTON_PIN = 0;     // TBD
 const int START_LED_PIN = 0;       // TBD
 const int MOVMENT_SEN_PIN = 0;     // TBD
 const int OPERATOR_BUTTON_PIN = 0; // TBD
 
-const int FALSE_ENTER_RESET_TIME = 10000; // 10 sec
-const int HALL_WIDTH = 1100;              // mm
+const int FALSE_ENTER_RESET_TIME = 5000; // 5 sec
+const int HALL_WIDTH = 1100;             // mm
 const byte START_SPEAKER_SIGN = 1;
 const byte STOP_SPEAKER_SIGN = 0;
 const int SOUND_DURATION = 2000; // duration of the laser touching sound
@@ -40,7 +40,7 @@ int rangeCnt = 0;
 
 void lox_setup()
 {
-  Serial.println("Starting VL53L0X boot");
+  // Serial.println("Starting VL53L0X boot");
   while ((!rangeBooted) && (rangeBootCnt < RANGE_BOOT_RETRIES))
   {
     if (lox.begin())
@@ -78,7 +78,7 @@ void lox_setup()
 void setup()
 {
   pinMode(LOCK_CONTROL_PIN, OUTPUT);
-  pinMode(LOCK_SEN_PIN, INPUT);
+  pinMode(LOCK_SEN_PIN, INPUT_PULLUP);
   pinMode(STOP_BUTTON_PIN, INPUT);     // PULLUP?
   pinMode(OPERATOR_BUTTON_PIN, INPUT); // PULLUP?
   pinMode(MOVMENT_SEN_PIN, INPUT);
@@ -119,19 +119,20 @@ void loop()
   int touch_counter = 0;
   bool someone_entered = false;
 
-  Wire.beginTransmission(4); // transmit to device #4
+  // Serial.println(door_sen_val);
 
-  if (lox.isRangeComplete())
-  {
-    Serial.print("Distance in mm: ");
-    TOF_val = lox.readRange();
-    Serial.println(TOF_val);
-  }
+  Wire.beginTransmission(4); // transmit to device #4
 
   digitalWrite(START_LED_PIN, 1);
 
   while (has_started)
   {
+    if (lox.isRangeComplete())
+    {
+      TOF_val = lox.readRange();
+      Serial.print("Distance in mm: ");
+      Serial.println(TOF_val);
+    }
     bool operator_button_val = digitalRead(OPERATOR_BUTTON_PIN);
 
     if (!operator_button_val && last_operator_button_val)
