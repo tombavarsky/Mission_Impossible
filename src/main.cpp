@@ -19,7 +19,6 @@ const byte START_SPEAKER_SIGN = 1;
 const byte STOP_SPEAKER_SIGN = 0;
 const int SOUND_DURATION = 2000; // duration of the laser touching sound
 
-bool door_sen_val = true;
 bool last_door_sen_val = true;
 bool light_sen_val[LIGHT_SEN_AMOUNT];
 bool last_light_sen_val[LIGHT_SEN_AMOUNT];
