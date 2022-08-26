@@ -98,8 +98,7 @@ void setup()
 
 void send_to_speaker(byte sign)
 {
-  Wire.write("sign is "); // sends five bytes to speaker
-  Wire.write(sign);       // sends one byte to speaker
+  Wire.write(sign);
 }
 
 void draw_string(int start_x, int start_y, String str, Panel::Colors color, int size_modifier)
@@ -110,12 +109,14 @@ void draw_string(int start_x, int start_y, String str, Panel::Colors color, int 
   }
 }
 
+String curr_time_str;
+
 void loop()
 {
   bool door_sen_val = digitalRead(LOCK_SEN_PIN);
   bool has_started = door_sen_val && !last_door_sen_val;
-  long long start_time = millis();
-  long long hit_time = start_time;
+  unsigned long start_time = millis();
+  unsigned long hit_time = start_time;
   int touch_counter = 0;
   bool someone_entered = false;
 
@@ -127,16 +128,22 @@ void loop()
 
   while (has_started)
   {
+    curr_time_str = String((float)(millis() - start_time) / 1000);
+
     if (lox.isRangeComplete())
     {
       TOF_val = lox.readRange();
       // Serial.print("Distance in mm: ");
       // Serial.println(TOF_val);
     }
+
+    draw_string(4, 0, "your time: ", panel.RED, 1); // shows curr time
+    draw_string(4, 8, curr_time_str, panel.RED, 1);
+
     bool operator_button_val = digitalRead(OPERATOR_BUTTON_PIN);
 
     if (!operator_button_val && last_operator_button_val)
-    {
+    { // operator button
       break;
     }
 
@@ -150,21 +157,21 @@ void loop()
     }
 
     if (TOF_val < HALL_WIDTH - 100)
-    {
+    { // person's entrance detected
       someone_entered = true;
     }
 
     if (!someone_entered && millis() - start_time >= FALSE_ENTER_RESET_TIME)
-    { // TODO: set someone_entered using the sensor
+    {
       has_started = false;
     }
 
     for (int i = 0; i < LIGHT_SEN_AMOUNT; i++)
     {
       light_sen_val[i] = digitalRead(i);
-      Serial.print(i);
-      Serial.print(" : ");
-      Serial.println(light_sen_val[i]);
+      // Serial.print(i);
+      // Serial.print(" : ");
+      // Serial.println(light_sen_val[i]);
 
       if (!light_sen_val[i] && last_light_sen_val[i])
       {
@@ -193,7 +200,7 @@ void loop()
   last_door_sen_val = door_sen_val;
 
   float total_time = (millis() - start_time) / 1000; // sec
-  String total_time_str = String(total_time);
+  String total_time_str = curr_time_str;
 
   // panel part
   draw_string(4, 0, "your time: ", panel.RED, 1);
