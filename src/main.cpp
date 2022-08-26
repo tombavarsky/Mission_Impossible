@@ -12,6 +12,7 @@ const int STOP_BUTTON_PIN = 0;     // TBD
 const int START_LED_PIN = 0;       // TBD
 const int MOVMENT_SEN_PIN = 0;     // TBD
 const int OPERATOR_BUTTON_PIN = 0; // TBD
+const int TOUCH_SPEAKER_ADDRESS = 4;
 
 const int FALSE_ENTER_RESET_TIME = 5000; // 5 sec
 const int HALL_WIDTH = 1100;             // mm
@@ -96,9 +97,11 @@ void setup()
   lox_setup();
 }
 
-void send_to_speaker(byte sign)
+void send_to_touch_speaker(byte sign)
 {
+  Wire.beginTransmission(TOUCH_SPEAKER_ADDRESS); // transmit to device #4
   Wire.write(sign);
+  Wire.endTransmission();
 }
 
 void draw_string(int start_x, int start_y, String str, Panel::Colors color, int size_modifier)
@@ -121,8 +124,6 @@ void loop()
   bool someone_entered = false;
 
   // Serial.println(door_sen_val);
-
-  Wire.beginTransmission(4); // transmit to device #4
 
   digitalWrite(START_LED_PIN, 1);
 
@@ -178,7 +179,7 @@ void loop()
         touch_counter++;
         hit_time = millis();
 
-        send_to_speaker(START_SPEAKER_SIGN);
+        send_to_touch_speaker(START_SPEAKER_SIGN);
       }
 
       last_light_sen_val[i] = light_sen_val[i];
@@ -186,14 +187,14 @@ void loop()
 
     if (millis() - hit_time > SOUND_DURATION)
     {
-      send_to_speaker(STOP_SPEAKER_SIGN);
+      send_to_touch_speaker(STOP_SPEAKER_SIGN);
     }
 
     last_stop_button_val = stop_button_val;
     last_operator_button_val = operator_button_val;
   }
 
-  send_to_speaker(STOP_SPEAKER_SIGN);
+  send_to_touch_speaker(STOP_SPEAKER_SIGN);
 
   digitalWrite(LOCK_CONTROL_PIN, 0); // unlocks door
 
