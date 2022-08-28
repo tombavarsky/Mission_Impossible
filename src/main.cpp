@@ -10,14 +10,14 @@ const int LOCK_CONTROL_PIN = 25;   // TBD
 const int LOCK_SEN_PIN = 27;       // TBD
 const int STOP_BUTTON_PIN = 0;     // TBD
 const int START_LED_PIN = 0;       // TBD
-const int MOVMENT_SEN_PIN = 0;     // TBD
 const int OPERATOR_BUTTON_PIN = 0; // TBD
 const int TOUCH_SPEAKER_ADDRESS = 4;
+const int ESP_ADDRESS = 0;
 
 const int FALSE_ENTER_RESET_TIME = 5000; // 5 sec
 const int HALL_WIDTH = 1100;             // mm
-const byte START_SPEAKER_SIGN = 1;
-const byte STOP_SPEAKER_SIGN = 0;
+const byte START_SPEAKER = 1;
+const byte STOP_SPEAKER = 0;
 const int SOUND_DURATION = 2000; // duration of the laser touching sound
 
 bool last_door_sen_val = true;
@@ -82,7 +82,6 @@ void setup()
   pinMode(LOCK_SEN_PIN, INPUT_PULLUP);
   pinMode(STOP_BUTTON_PIN, INPUT);     // PULLUP?
   pinMode(OPERATOR_BUTTON_PIN, INPUT); // PULLUP?
-  pinMode(MOVMENT_SEN_PIN, INPUT);
   pinMode(START_LED_PIN, OUTPUT);
 
   Serial.begin(9600);
@@ -125,7 +124,7 @@ void loop()
 
   // Serial.println(door_sen_val);
 
-  digitalWrite(START_LED_PIN, 1);
+  digitalWrite(START_LED_PIN, 1); // invites to start
 
   while (has_started)
   {
@@ -149,7 +148,7 @@ void loop()
     }
 
     digitalWrite(LOCK_CONTROL_PIN, 1); // locks door
-    digitalWrite(START_LED_PIN, 0);
+    digitalWrite(START_LED_PIN, 0);    // stops from getting in
 
     has_finnished = stop_button_val && !last_stop_button_val; // just closed the door
     if (has_finnished)
@@ -163,7 +162,7 @@ void loop()
     }
 
     if (!someone_entered && millis() - start_time >= FALSE_ENTER_RESET_TIME)
-    {
+    { // false entrance
       has_started = false;
     }
 
@@ -179,7 +178,7 @@ void loop()
         touch_counter++;
         hit_time = millis();
 
-        send_to_touch_speaker(START_SPEAKER_SIGN);
+        send_to_touch_speaker(START_SPEAKER);
       }
 
       last_light_sen_val[i] = light_sen_val[i];
@@ -187,14 +186,14 @@ void loop()
 
     if (millis() - hit_time > SOUND_DURATION)
     {
-      send_to_touch_speaker(STOP_SPEAKER_SIGN);
+      send_to_touch_speaker(STOP_SPEAKER);
     }
 
     last_stop_button_val = stop_button_val;
     last_operator_button_val = operator_button_val;
   }
 
-  send_to_touch_speaker(STOP_SPEAKER_SIGN);
+  send_to_touch_speaker(STOP_SPEAKER);
 
   digitalWrite(LOCK_CONTROL_PIN, 0); // unlocks door
 
@@ -202,6 +201,11 @@ void loop()
 
   float total_time = (millis() - start_time) / 1000; // sec
   String total_time_str = curr_time_str;
+
+  Wire.beginTransmission(ESP_ADDRESS);
+  Wire.write((int)total_time);
+  Wire.write(touch_counter);
+  Wire.endTransmission();
 
   // panel part
   draw_string(4, 0, "your time: ", panel.RED, 1);
