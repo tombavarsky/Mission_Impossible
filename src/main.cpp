@@ -18,7 +18,7 @@ const int FALSE_ENTER_RESET_TIME = 5000; // 5 sec
 const int HALL_WIDTH = 1100;             // mm
 const byte START_SPEAKER = 1;
 const byte STOP_SPEAKER = 0;
-const int SOUND_DURATION = 2000; // duration of the laser touching sound
+const int SOUND_DURATION = 1500; // duration of the laser touching sound
 
 bool last_door_sen_val = true;
 bool light_sen_val[LIGHT_SEN_AMOUNT];
@@ -166,12 +166,17 @@ void loop()
       has_started = false;
     }
 
-    for (int i = 0; i < LIGHT_SEN_AMOUNT; i++)
+    for (int i = 2; i < LIGHT_SEN_AMOUNT + 2; i++)
     {
       light_sen_val[i] = digitalRead(i);
       // Serial.print(i);
       // Serial.print(" : ");
-      // Serial.println(light_sen_val[i]);
+      // Serial.print(light_sen_val[i]);
+      // Serial.print("\t");
+      // Serial.print(" last: ");
+      // Serial.print(last_light_sen_val[i]);
+      // Serial.print("\t");
+      // Serial.println(!light_sen_val[i] && last_light_sen_val[i]);
 
       if (!light_sen_val[i] && last_light_sen_val[i])
       {
@@ -179,6 +184,7 @@ void loop()
         hit_time = millis();
 
         send_to_touch_speaker(START_SPEAKER);
+        Serial.println("speaker on!!");
       }
 
       last_light_sen_val[i] = light_sen_val[i];
@@ -187,6 +193,7 @@ void loop()
     if (millis() - hit_time > SOUND_DURATION)
     {
       send_to_touch_speaker(STOP_SPEAKER);
+      Serial.println("speaker off");
     }
 
     last_stop_button_val = stop_button_val;
