@@ -10,6 +10,7 @@ const int LOCK_CONTROL_PIN = 25;   // TBD
 const int LOCK_SEN_PIN = 27;       // TBD
 const int STOP_BUTTON_PIN = 0;     // TBD
 const int START_LED_PIN = 0;       // TBD
+const int LED_STRIP_PIN = 0;       // TBD
 const int OPERATOR_BUTTON_PIN = 0; // TBD
 const int TOUCH_SPEAKER_ADDRESS = 4;
 const int ESP_ADDRESS = 0;
@@ -125,7 +126,7 @@ void loop()
 
   // Serial.println(door_sen_val);
 
-  digitalWrite(START_LED_PIN, 1); // invites to start
+  digitalWrite(START_LED_PIN, 1); // LED invites to start
 
   while (has_started)
   {
@@ -150,7 +151,7 @@ void loop()
     }
 
     digitalWrite(LOCK_CONTROL_PIN, 1); // locks door
-    digitalWrite(START_LED_PIN, 0);    // stops from getting in
+    digitalWrite(START_LED_PIN, 0);    // LED stops from getting in
 
     has_finnished = stop_button_val && !last_stop_button_val; // just closed the door
     if (has_finnished)
