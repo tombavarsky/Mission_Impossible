@@ -96,7 +96,7 @@ void setup()
   lox_setup();
 }
 
-void send_to_touch_speaker(byte sign)
+void send_to_speaker(byte sign)
 {
   Wire.beginTransmission(TOUCH_SPEAKER_ADDRESS); // transmit to device #4
   Wire.write(sign);
@@ -169,22 +169,22 @@ void loop()
     for (int i = 2; i < LIGHT_SEN_AMOUNT + 2; i++)
     {
       light_sen_val[i] = digitalRead(i);
-      // Serial.print(i);
-      // Serial.print(" : ");
-      // Serial.print(light_sen_val[i]);
-      // Serial.print("\t");
-      // Serial.print(" last: ");
-      // Serial.print(last_light_sen_val[i]);
-      // Serial.print("\t");
-      // Serial.println(!light_sen_val[i] && last_light_sen_val[i]);
+      Serial.print(i);
+      Serial.print(" : ");
+      Serial.print(light_sen_val[i]);
+      Serial.print("\t");
+      Serial.print(" last: ");
+      Serial.print(last_light_sen_val[i]);
+      Serial.print("\t");
+      Serial.println(!light_sen_val[i] && last_light_sen_val[i]);
 
       if (!light_sen_val[i] && last_light_sen_val[i])
       {
         touch_counter++;
         hit_time = millis();
 
-        send_to_touch_speaker(START_SPEAKER);
-        Serial.println("speaker on!!");
+        send_to_speaker(START_SPEAKER);
+        // Serial.println("speaker on!!");
       }
 
       last_light_sen_val[i] = light_sen_val[i];
@@ -192,7 +192,7 @@ void loop()
 
     if (millis() - hit_time > SOUND_DURATION)
     {
-      send_to_touch_speaker(STOP_SPEAKER);
+      send_to_speaker(STOP_SPEAKER);
       Serial.println("speaker off");
     }
 
@@ -200,7 +200,7 @@ void loop()
     last_operator_button_val = operator_button_val;
   }
 
-  send_to_touch_speaker(STOP_SPEAKER);
+  send_to_speaker(STOP_SPEAKER);
 
   digitalWrite(LOCK_CONTROL_PIN, 0); // unlocks door
 
