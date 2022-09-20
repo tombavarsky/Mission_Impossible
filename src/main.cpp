@@ -2,7 +2,7 @@
 #include <FastLED.h>
 #include <Adafruit_VL53L0X.h>
 #include <Wire.h>
-#include <Panel.h>
+#include <SoftwareSerial.h>
 
 const int RANGE_BOOT_RETRIES = 3;
 const int LIGHT_SEN_AMOUNT = 18;
@@ -30,6 +30,13 @@ bool stop_button_val = false;
 bool last_stop_button_val = false;
 bool has_finnished = false;
 bool last_operator_button_val = false;
+
+//so only the following can be used for RX: 10, 11, 12, 13, 14, 15, 50, 51, 52, 53, A8 (62), A9 (63), A10 (64), A11 (65), A12 (66), A13 (67), A14 (68), A15 (69)
+
+const int RX_PIN = 0;
+const int TX_PIN = 0;
+
+SoftwareSerial screen(RX_PIN, TX_PIN);
 
 Adafruit_VL53L0X lox = Adafruit_VL53L0X();
 Panel panel(32, 64);
@@ -87,6 +94,7 @@ void setup()
   pinMode(START_LED_PIN, OUTPUT);
 
   Serial.begin(9600);
+  screen.begin(9600);
   Wire.begin();
   panel.createBufferBG(panel.BLACK); // background black
 
@@ -103,6 +111,11 @@ void send_to_speaker(byte sign)
   Wire.beginTransmission(TOUCH_SPEAKER_ADDRESS); // transmit to device #4
   Wire.write(sign);
   Wire.endTransmission();
+}
+
+void send_to_screen(int total_time, int touch_count){
+  screen.write(total_time);
+  screen.write(touch_count);
 }
 
 void draw_string(int start_x, int start_y, String str, Panel::Colors color, int size_modifier)
@@ -193,6 +206,8 @@ void loop()
       last_light_sen_val[i] = light_sen_val[i];
     }
 
+    send_to_screen((int)((millis() - start_time) / 1000), touch_counter);
+
     // if (millis() - hit_time > SOUND_DURATION)
     // {
     // send_to_speaker(STOP_SPEAKER);
@@ -216,47 +231,4 @@ void loop()
   Wire.write((int)total_time);
   Wire.write(touch_counter);
   Wire.endTransmission();
-
-  // panel part
-  draw_string(4, 0, "your time: ", panel.RED, 1);
-
-  // panel.drawBigChar(4, 0, 'y', panel.RED, 1);
-  // panel.drawBigChar(8, 0, 'o', panel.RED, 1);
-  // panel.drawBigChar(12, 0, 'u', panel.RED, 1);
-  // panel.drawBigChar(16, 0, 'r', panel.RED, 1);
-  // panel.drawBigChar(20, 0, ' ', panel.RED, 1);
-  // panel.drawBigChar(24, 0, 't', panel.RED, 1);
-  // panel.drawBigChar(28, 0, 'i', panel.RED, 1);
-  // panel.drawBigChar(32, 0, 'm', panel.RED, 1);
-  // panel.drawBigChar(36, 0, 'e', panel.RED, 1);
-  // panel.drawBigChar(40, 0, ':', panel.RED, 1);
-  // panel.drawBigChar(40, 0, ' ', panel.RED, 1);
-
-  draw_string(4, 8, total_time_str, panel.RED, 1);
-
-  // for (int i = 0; i < total_time_str.length(); i++)
-  // {
-  //   panel.drawBigChar((i * 4) + 4, 8, total_time_str[i], panel.RED, 1);
-  // }
-
-  draw_string(4, 16, "number of", panel.RED, 1);
-  draw_string(4, 20, "hits: ", panel.RED, 1);
-  draw_string(28, 20, String(touch_counter), panel.RED, 1);
-
-  // panel.drawBigChar(4, 16, 'n', panel.RED, 1);
-  // panel.drawBigChar(8, 16, 'u', panel.RED, 1);
-  // panel.drawBigChar(12, 16, 'm', panel.RED, 1);
-  // panel.drawBigChar(16, 16, 'b', panel.RED, 1);
-  // panel.drawBigChar(20, 16, 'e', panel.RED, 1);
-  // panel.drawBigChar(24, 16, 'r', panel.RED, 1);
-  // panel.drawBigChar(28, 16, ' ', panel.RED, 1);
-  // panel.drawBigChar(32, 16, 'o', panel.RED, 1);
-  // panel.drawBigChar(36, 16, 'f', panel.RED, 1);
-  // panel.drawBigChar(4, 20, 'h', panel.RED, 1);
-  // panel.drawBigChar(8, 20, 'i', panel.RED, 1);
-  // panel.drawBigChar(12, 20, 't', panel.RED, 1);
-  // panel.drawBigChar(16, 20, 's', panel.RED, 1);
-  // panel.drawBigChar(20, 20, ':', panel.RED, 1);
-  // panel.drawBigChar(24, 20, ' ', panel.RED, 1);
-  // panel.drawBigChar(28, 20, touch_counter, panel.RED, 1);
 }
