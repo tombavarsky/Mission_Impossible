@@ -6,15 +6,15 @@
 
 const int NUM_LEDS = 20;
 const int LIGHT_SEN_AMOUNT = 10;
-const int LOCK_CONTROL_PIN = 25;   // TBD
+const int LOCK_CONTROL_PIN = 25; // TBD
 const int LOCK_SEN_PIN = 12;
 const int STOP_BUTTON_PIN = 17;
-const int START_LED_PIN = 0;       // TBD
+const int START_LED_PIN = 0; // TBD
 const int LED_STRIP_PIN = 13;
 const int OPERATOR_BUTTON_PIN = 0; // TBD
 const int TOUCH_SPEAKER_ADDRESS = 4;
-const int ESP_ADDRESS = 2; //tbd
-const int SCREEN_ADDRESS = 1; //tbd
+const int ESP_ADDRESS = 2;    // tbd
+const int SCREEN_ADDRESS = 1; // tbd
 
 const int FALSE_ENTER_RESET_TIME = 5000; // 5 sec
 const int HALL_WIDTH = 1100;             // mm
@@ -34,18 +34,16 @@ bool last_operator_button_val = false;
 long screen_update_time = 0;
 byte last_sign_sent = 3;
 
-
 CRGB leds[NUM_LEDS];
-
 
 void setup()
 {
-  FastLED.addLeds<NEOPIXEL, LED_STRIP_PIN>(leds, NUM_LEDS);  // GRB ordering is assumed
+  FastLED.addLeds<NEOPIXEL, LED_STRIP_PIN>(leds, NUM_LEDS); // GRB ordering is assumed
 
   pinMode(LOCK_CONTROL_PIN, OUTPUT);
   pinMode(LOCK_SEN_PIN, INPUT_PULLUP);
-  pinMode(STOP_BUTTON_PIN, INPUT_PULLUP);     // PULLUP?
-  pinMode(OPERATOR_BUTTON_PIN, INPUT); // PULLUP?
+  pinMode(STOP_BUTTON_PIN, INPUT_PULLUP); // PULLUP?
+  pinMode(OPERATOR_BUTTON_PIN, INPUT);    // PULLUP?
   pinMode(START_LED_PIN, OUTPUT);
 
   Serial.begin(9600);
@@ -69,7 +67,8 @@ void send_to_speaker(byte sign)
   Serial.println(sign);
 }
 
-void send_to_screen(int total_time, int touch_count){
+void send_to_screen(int total_time, int touch_count)
+{
   Wire.beginTransmission(SCREEN_ADDRESS);
   Wire.write(total_time);
   Wire.write(touch_count);
@@ -99,13 +98,15 @@ void loop()
     door_sen_val = digitalRead(LOCK_SEN_PIN);
     has_finnished = false;
 
-    if(door_sen_val && !last_door_sen_val){
+    if (door_sen_val && !last_door_sen_val)
+    {
       break;
     }
-    
+
     last_door_sen_val = door_sen_val;
 
-    if(first_run){
+    if (first_run)
+    {
       send_to_speaker(START_SPEAKER_MAIN); // play mission impossible
     }
     first_run = false;
@@ -156,7 +157,8 @@ void loop()
         touch_counter++;
         hit_time = millis();
 
-        for(int i = 0; i < NUM_LEDS; i++){
+        for (int i = 0; i < NUM_LEDS; i++)
+        {
           leds[i] = CRGB::Red;
         }
         FastLED.show();
@@ -170,7 +172,8 @@ void loop()
     Serial.println();
     long curr_time_milisec = millis() - start_time;
 
-    if (curr_time_milisec - screen_update_time >= 1000){
+    if (curr_time_milisec - screen_update_time >= 1000)
+    {
       Serial.println(touch_counter);
       screen_update_time = curr_time_milisec;
       send_to_screen(int(curr_time_milisec / 1000), touch_counter);
@@ -182,27 +185,29 @@ void loop()
     //   Serial.println("speaker off");
     // }
 
-    
     last_operator_button_val = operator_button_val;
   }
 
-  for(int i = 0; i < NUM_LEDS; i++){
+  for (int i = 0; i < NUM_LEDS; i++)
+  {
     leds[i] = CRGB::Black;
   }
 
-  FastLED.show(); 
+  FastLED.show();
 
   screen_update_time = 0;
 
-  if(!first_run){
+  if (!first_run)
+  {
     send_to_speaker(STOP_SPEAKER);
   }
-  
+
   digitalWrite(LOCK_CONTROL_PIN, 0); // unlocks door
 
   float total_time = (millis() - start_time) / 1000; // sec
   String total_time_str = curr_time_str;
-  if(has_finnished){
+  if (has_finnished)
+  {
     Wire.beginTransmission(ESP_ADDRESS);
     Wire.write((int)total_time);
     Wire.write(touch_counter);
