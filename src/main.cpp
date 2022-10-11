@@ -12,7 +12,7 @@ const int STOP_BUTTON_PIN = 17;
 const int LED_STRIP_PIN = 13;
 const int OPERATOR_BUTTON_PIN = 0; // TBD
 const int SPEAKER_ADDRESS = 4;
-const int ESP_ADDRESS = 2;    // tbd
+const int ESP_ADDRESS = 2;
 const int SCREEN_ADDRESS = 1; // tbd
 
 const int FALSE_ENTER_RESET_TIME = 5000; // 5 sec
@@ -65,7 +65,12 @@ bool blink_led(long long curr_time, int duration, int change_rate, CRGB::HTMLCol
     }
 
     FastLED.show();
-    return false;
+  }else{
+    for (int i = 0; i < NUM_LEDS; i++)
+    {
+      leds[i] = CRGB::Black;
+    }
+    FastLED.show();
   }
   return true;
 }
@@ -163,10 +168,10 @@ void loop()
       break;
     }
 
-    if (!someone_entered && curr_time - start_time >= FALSE_ENTER_RESET_TIME)
-    { // false entrance
-      has_started = false;
-    }
+    // if (!someone_entered && curr_time - start_time >= FALSE_ENTER_RESET_TIME)
+    // { // false entrance
+    //   has_started = false;
+    // }
 
     for (int i = 2; i < LIGHT_SEN_AMOUNT + 2; i++)
     {
@@ -194,7 +199,7 @@ void loop()
     }
 
     // red blinking for touching laser
-    blink_led(curr_time, 1000, 200, CRGB::Red, got_hit);
+    blink_led(curr_time, 1000, 100, CRGB::Red, got_hit);
     got_hit = false;
 
     long curr_time_milisec = curr_time - start_time;
@@ -225,8 +230,10 @@ void loop()
 
   if (rank == 1)
   { // winers blink
-    blink_led(millis(), 5000, 200, CRGB::Green, has_finnished);
+    blink_led(millis(), 3000, 80, CRGB::Green, has_finnished);
   }
+
+  blink_led(millis(), 1000, 100, CRGB::White, has_finnished);
 
   if (has_finnished)
   {
@@ -234,6 +241,8 @@ void loop()
     Wire.write((int)total_time);
     Wire.write(touch_counter);
     Wire.endTransmission();
+
+    Serial.println("sent data to esp----------------------");
 
     has_finnished = false;
   }

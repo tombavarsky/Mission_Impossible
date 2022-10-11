@@ -2,12 +2,13 @@
 #include <WiFiClientSecure.h>
 #include <ESP8266HTTPClient.h>
 #include <Wire.h>
+#include <ArduinoJson.h>
 
 #define STAND_NAME "MissionImpossible" // stand name
 
 int gameResult;
-int touch_count;
-int time;
+int touch_counter;
+int t_time;
 
 const char *host = "iddofroom.wixsite.com";
 
@@ -17,32 +18,13 @@ const int httpPort = 443; // 80 for insecure (http), 443 for secure (https). Els
 
 String text = "";
 
-void setup()
+void read_results(int a)
 {
-  Serial.begin(115200);
-  delay(10);
-  Wire.begin(2); // address is 2
-  Wire.onReceive(read_results);
-
-  ConnectWiFi("usrname", "pswrd", true);
-}
-
-void loop()
-{
-
-  WiFiClientSecure client;
-
-  ConnectWebsite(client, true);
-  String player_rank = GETRequest(client, time, touch_count, true);
-
-  Serial.println(player_rank);
-  // send rank to arduino
-}
-
-void read_results()
-{
-  time = Wire.read();
+   Serial.print("time is -------------------");
+  t_time = Wire.read();
   touch_counter = Wire.read();
+
+  Serial.println(t_time);
 }
 
 /*
@@ -128,8 +110,9 @@ String GETRequest(WiFiClientSecure client, int total_time, int touch_cnt, bool t
   {
     String line = client.readStringUntil('\n');
     if (toSerial)
-      Serial.println("reading");
+      Serial.print("r");
     if (line == "\r")
+      Serial.println();
       break;
   }
 
@@ -140,4 +123,33 @@ String GETRequest(WiFiClientSecure client, int total_time, int touch_cnt, bool t
   if (toSerial)
     Serial.println(text);
   return text;
+}
+StaticJsonDocument<200> doc;
+void setup()
+{
+
+  Serial.begin(9600);
+  delay(10);
+  Wire.begin(2); // address is 2
+  Wire.onReceive(read_results);
+
+  ConnectWiFi("Tomba", "tomba123", true);
+}
+
+void loop()
+{
+
+  WiFiClientSecure client;
+
+  ConnectWebsite(client, false);
+  String player_rank = GETRequest(client, t_time, touch_counter, false);
+
+  deserializeJson(doc, player_rank);
+  bool did_win = doc["winner"];
+  
+  Serial.print("WINNER------");
+  Serial.println(did_win);
+
+//  Serial.println(player_rank);
+  // send rank to arduino
 }
